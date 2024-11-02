@@ -17,11 +17,11 @@ document.getElementById('criteria-select').addEventListener('change', function(e
             break;
         case '2':
             placeholderText = 'Enter content rating';
-            hintMessage = 'Specify the content rating (e.g., PG, PG-13, R).';
+            hintMessage = 'Specify the content rating: G, PG, PG-13, NR or R';
             break;
         case '3':
             placeholderText = 'Enter genre';
-            hintMessage = 'Mention the genre (e.g., Action, Comedy, Drama) that interests you.';
+            hintMessage = 'Mention the genre that interests you.<br> You can choose: Action, Adventure, Animation, Art House, Classics, Comedy, Documentary, Drama, Family, Fantasy, Horror, International, Kids, Musical, Mystery, Romance, Science Fiction, Special Interest, Sports, Television, Western';
             break;
         case '4':
             placeholderText = 'Enter author name';
@@ -33,13 +33,9 @@ document.getElementById('criteria-select').addEventListener('change', function(e
             break;
         case '6':
             placeholderText = 'Enter release year';
-            hintMessage = 'Enter the release year of the movie you are looking for.';
+            hintMessage = 'Enter the release year of the movies you are interested in.';
             break;
         case '7':
-            placeholderText = 'Enter runtime (in minutes)';
-            hintMessage = 'Specify the movie runtime in minutes (e.g., 120 for 2 hours).';
-            break;
-        case '8':
             placeholderText = 'Enter production company';
             hintMessage = 'Input the name of the production company (e.g., Warner Bros).';
             break;
@@ -50,7 +46,7 @@ document.getElementById('criteria-select').addEventListener('change', function(e
     }
 
     inputField.placeholder = placeholderText;
-    hintText.textContent = hintMessage;
+    hintText.innerHTML = hintMessage;
 
     inputContainer.style.display = 'block';
     hintContainer.style.display = 'block';
@@ -63,7 +59,7 @@ document.getElementById('rec-form').addEventListener('submit', function(e) {
     const userInput = document.getElementById('criteria-input').value;
     const outputDiv = document.getElementById('recommendation-output');
 
-    if (!userInput || criterionSelect === "Select a criterion for building a recommendation") {
+    if (criterionSelect === "Select a criterion for building a recommendation") {
         showError('Please select a criterion and provide input.');
         return;
     }
@@ -78,41 +74,53 @@ document.getElementById('rec-form').addEventListener('submit', function(e) {
             'criteria-input': userInput
         })
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) {
+            return response.json().then(data => {
+                throw new Error(data.error || 'Failed to fetch recommendations.');
+            });
+        }
+        return response.json();
+    })
     .then(data => {
         outputDiv.innerHTML = '';
-        const box = document.createElement('div');
-        box.className = 'recommendation-box';
 
-        if (data.recommendations) {
+        if (data.recommendations && data.recommendations.length > 0) {
+            const box = document.createElement('div');
+            box.className = 'recommendation-box';
+
             data.recommendations.forEach(rec => {
                 const recommendation = document.createElement('p');
                 recommendation.textContent = rec;
                 box.appendChild(recommendation);
             });
-        } else {
-            box.innerHTML = '<p>No recommendations found.</p>';
-        }
 
-        outputDiv.appendChild(box);
+            outputDiv.appendChild(box);
+        } else {
+            showError('No recommendations found for the given input.');
+        }
     })
     .catch(error => {
         console.error('Error:', error);
-        showError('There was an error processing your request.');
+        showError(error.message || 'An error occurred while processing your request.');
     });
 });
 
 
 function showError(message) {
-    const errorMessage = document.createElement('p');
-    errorMessage.className = 'error-message';
-    errorMessage.textContent = message;
-
-    const outputDiv = document.getElementById('recommendation-output');
-    outputDiv.innerHTML = '';
-    outputDiv.appendChild(errorMessage);
+    const errorDiv = document.getElementById('error-output');
+    errorDiv.innerHTML = `
+        <p class="error-message">${message}</p>
+        <button class="close-button" onclick="closeError()">✖</button>
+    `;
+    errorDiv.style.display = 'flex';
 
     setTimeout(() => {
-        outputDiv.innerHTML = '';
-    }, 2000);
+        closeError();
+    }, 5000);
+}
+
+function closeError() {
+    const errorDiv = document.getElementById('error-output');
+    errorDiv.style.display = 'none';
 }

@@ -5,7 +5,14 @@ Home
 {% endblock %}
 
 {% block content %}
+<div id="error-output" class="error-message-container" style="display: none;"></div>
 <h1 align="center">Enjoy your recommendations</h1>
+<div align="right">
+    <a href="/home">
+        <button type="button" class="btn btn-lg btn-secondary">Back</button>
+    </a>
+</div>
+
 <form id="rec-form" class="form-container">
     <label for="criteria-select" class="form-label">Choose a criterion:</label>
     <select id="criteria-select" class="form-select">
@@ -15,9 +22,8 @@ Home
         <option value="3">Genre</option>
         <option value="4">Author</option>
         <option value="5">Actor</option>
-        <option value="6">Release Year</option>
-        <option value="7">Runtime</option>
-        <option value="8">Production Company</option>
+        <option value="6">Release Year</option> 
+        <option value="7">Production Company</option>
     </select>
     <br/>
     <div id="input-container" class="input-container" style="display: none;">
@@ -31,9 +37,7 @@ Home
     <button type="submit" class="submit-btn">Get Recommendations</button>
 </form>
 
-<!-- Контейнер для рекомендаций -->
 <div id="recommendation-output" class="recommendation-output"></div>
-
 <link rel="stylesheet" href="{{ url_for('static', filename='css/recommendations.css') }}">
 <script src="{{ url_for('static', filename='js/recommendations.js') }}"></script>
 

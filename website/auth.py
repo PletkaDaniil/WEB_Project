@@ -21,7 +21,7 @@ def login():
             else:
                 flash("Password is incorrect.", category="error")
         else:
-            flash("Email doesn\'t exist.", category="success")
+            flash("Email doesn\'t exist.", category="error")
 
 
     return render_template("login.html", user=current_user)
@@ -62,5 +62,4 @@ def sign_up():
 @login_required
 def logout():
     logout_user()
-    #func name in the view.py file
     return redirect(url_for("views.home"))

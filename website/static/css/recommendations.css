@@ -95,3 +95,35 @@
     font-size: 16px;
     text-align: center;
 }
+
+.error-message-container {
+    position: fixed;
+    top: 100px;
+    left: 20px;
+    background-color: #f8d7da;
+    color: #721c24;
+    padding: 20px;
+    border: 1px solid #f5c6cb;
+    border-radius: 5px;
+    z-index: 1000;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    font-size: 18px;
+    max-width: 400px;
+    word-wrap: break-word;
+}
+
+.error-message {
+    margin: 0;
+}
+
+.close-button {
+    background: none;
+    border: none;
+    color: #721c24;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 18px;
+}
