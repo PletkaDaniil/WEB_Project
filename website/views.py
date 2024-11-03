@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, request, flash, redirect, url_for,
 from flask_login import login_required, current_user
 from .models import Post, User, Comment, Like
 from . import db
-from .recommendation_func import recommend_by_genre,recommend_by_content_rating, recommend_by_author, recommend_by_actor, recommend_by_original_release_year, recommend_by_production_company
+from .recommendation_func import recommend_by_genre,recommend_by_content_rating, recommend_by_author, recommend_by_actor, recommend_by_original_release_year, recommend_by_production_company, recommend_by_plot
 
 views = Blueprint("views", __name__)
 
@@ -127,6 +127,7 @@ def like(post_id):
     return jsonify({"likes": len(post.likes), "liked": current_user.id in map(lambda x: x.author, post.likes)})
 
 
+
 @views.route("/recommendations-system", methods=['GET', 'POST'])
 @login_required
 def recommendation_list():
@@ -137,48 +138,28 @@ def recommendation_list():
         if not user_input:
             return jsonify({'error': 'The input cannot be empty'}), 400
 
-        recommendations = []
-        if selected_criterion == "1":  
-            recommendations = [f'Recommended movie based on plot "{user_input}"']
+        criteria_functions = {
+            "1": recommend_by_plot,
+            "2": recommend_by_content_rating,
+            "3": recommend_by_genre,
+            "4": recommend_by_author,
+            "5": recommend_by_actor,
+            "6": recommend_by_original_release_year,
+            "7": recommend_by_production_company
+        }
 
-        elif selected_criterion == "2":
-            result = recommend_by_content_rating(user_input)
-            if isinstance(result, dict) and "error" in result:
-                return jsonify({'error': result['error']}), 400 
-            recommendations = result.get("recommendations", [])
-
-        elif selected_criterion == "3": 
-            result = recommend_by_genre(user_input)
-            if isinstance(result, dict) and "error" in result:
-                return jsonify({'error': result['error']}), 400 
-            recommendations = result.get("recommendations", [])
-
-        elif selected_criterion == "4": 
-            result = recommend_by_author(user_input)
-            if isinstance(result, dict) and "error" in result:
-                return jsonify({'error': result['error']}), 400 
-            recommendations = result.get("recommendations", [])
-
-        elif selected_criterion == "5":  
-            result = recommend_by_actor(user_input)
-            if isinstance(result, dict) and "error" in result:
-                return jsonify({'error': result['error']}), 400 
-            recommendations = result.get("recommendations", [])
-
-        elif selected_criterion == "6":  
-            result = recommend_by_original_release_year(user_input)
-            if isinstance(result, dict) and "error" in result:
-                return jsonify({'error': result['error']}), 400 
-            recommendations = result.get("recommendations", []) 
-
-        elif selected_criterion == "7":
-            result = recommend_by_production_company(user_input)
-            if isinstance(result, dict) and "error" in result:
-                return jsonify({'error': result['error']}), 400 
-            recommendations = result.get("recommendations", []) 
-
+        recommendation_func = criteria_functions.get(selected_criterion)
+        if recommendation_func:
+            result = recommendation_func(user_input)
+            recommendations = handle_result(result)
         else:
             recommendations = [f'No specific recommendations for "{user_input}"']
+
         return jsonify({"recommendations": recommendations})
 
     return render_template('recommendations_system.html', user=current_user)
+
+def handle_result(result):
+    if isinstance(result, dict) and "error" in result:
+        return jsonify({'error': result['error']}), 400
+    return result.get("recommendations", [])

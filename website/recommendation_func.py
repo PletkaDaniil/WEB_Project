@@ -1,9 +1,51 @@
 from .models import Movie
 from sqlalchemy import desc, func
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+
+def recommend_by_plot(movie_title):
+    movie_title = movie_title.strip().lower()
+
+    target_movie = Movie.query.filter(
+        func.lower(Movie.title) == movie_title,
+        Movie.info.isnot(None), Movie.info != '', Movie.info != '0'
+    ).first()
+    
+    if not target_movie:
+        return {"error": "Movie not found or has no plot information. Please enter a valid movie title."}
+    
+    target_plot = target_movie.info.lower()
+
+    movies = Movie.query.filter(
+        Movie.info.isnot(None), Movie.info != '', Movie.info != '0',
+        Movie.original_release_date >= 1990,
+        Movie.rating >= 5,
+        Movie.id != target_movie.id
+    ).all()
+
+    movie_plots = [target_plot] + [movie.info.lower() for movie in movies]
+    
+    tfidf_vectorizer = TfidfVectorizer()
+    tfidf_matrix = tfidf_vectorizer.fit_transform(movie_plots)
+    cosine_similarities = cosine_similarity(tfidf_matrix[0:1], tfidf_matrix[1:]).flatten()
+    
+    movie_similarities = [(movie, similarity) for movie, similarity in zip(movies, cosine_similarities) if similarity > 0.1]
+    
+    movie_similarities = sorted(movie_similarities, key=lambda x: (x[1], x[0].rating), reverse=True)
+
+    recommendations = []
+    counter = 1
+    for movie, similarity in movie_similarities:
+        recommendations.append(f"{counter}. {movie.title} ({int(movie.original_release_date)})")
+        counter += 1
+
+    return {"recommendations": recommendations}
 
 
 def recommend_by_content_rating(content_rating):
-    valid_ratings = {'G', 'PG', 'PG-13', 'NR', 'R'}
+    content_rating = content_rating.strip().lower()
+    valid_ratings = {'g', 'pg', 'pg-13', 'nr', 'r'}
+    
     if content_rating not in valid_ratings:
         return {"error": "Invalid content rating. Please enter one of the following: G, PG, PG-13, NR, R"}
     
@@ -13,7 +55,7 @@ def recommend_by_content_rating(content_rating):
 
     for start_year, end_year in year_ranges:
         movies = Movie.query.filter(
-            Movie.content_rating == content_rating,
+            func.lower(Movie.content_rating) == content_rating,
             Movie.original_release_date >= start_year,
             Movie.original_release_date < end_year,
             Movie.info.isnot(None), Movie.info != '', Movie.info != '0',

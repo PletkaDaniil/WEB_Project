@@ -13,7 +13,7 @@ document.getElementById('criteria-select').addEventListener('change', function(e
     switch (selectedValue) {
         case '1':
             placeholderText = 'Enter plot details';
-            hintMessage = 'Provide a brief description or details about the movie plot.';
+            hintMessage = 'Enter the name of the movie whose plot you liked.';
             break;
         case '2':
             placeholderText = 'Enter content rating';
@@ -21,11 +21,11 @@ document.getElementById('criteria-select').addEventListener('change', function(e
             break;
         case '3':
             placeholderText = 'Enter genre';
-            hintMessage = 'Mention the genre that interests you.<br> You can choose: Action, Adventure, Animation, Art House, Classics, Comedy, Documentary, Drama, Family, Fantasy, Horror, International, Kids, Musical, Mystery, Romance, Science Fiction, Special Interest, Sports, Television, Western';
+            hintMessage = 'Enter the genre that interests you.<br> You can choose: Action, Adventure, Animation, Art House, Classics, Comedy, Documentary, Drama, Family, Fantasy, Horror, International, Kids, Musical, Mystery, Romance, Science Fiction, Special Interest, Sports, Television, Western';
             break;
         case '4':
             placeholderText = 'Enter author name';
-            hintMessage = 'Input the name of the movie director or writer.';
+            hintMessage = 'Enter the name of the movie director or writer.';
             break;
         case '5':
             placeholderText = 'Enter actor name';
@@ -37,7 +37,7 @@ document.getElementById('criteria-select').addEventListener('change', function(e
             break;
         case '7':
             placeholderText = 'Enter production company';
-            hintMessage = 'Input the name of the production company (e.g., Warner Bros).';
+            hintMessage = 'Enter the name of the production company (e.g. Warner Bros).';
             break;
         default:
             inputContainer.style.display = 'none';
