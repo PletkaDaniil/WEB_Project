@@ -127,39 +127,36 @@ def like(post_id):
     return jsonify({"likes": len(post.likes), "liked": current_user.id in map(lambda x: x.author, post.likes)})
 
 
-
 @views.route("/recommendations-system", methods=['GET', 'POST'])
 @login_required
 def recommendation_list():
-    if request.method == 'POST':
-        selected_criterion = request.form.get('criterion')
-        user_input = request.form.get('criteria-input')
+        if request.method == 'POST':
+            selected_criterion = request.form.get('criterion')
+            user_input = request.form.get('criteria-input')
 
-        if not user_input:
-            return jsonify({'error': 'The input cannot be empty'}), 400
+            if not user_input:
+                return jsonify({'error': 'The input cannot be empty'}), 400
 
-        criteria_functions = {
-            "1": recommend_by_plot,
-            "2": recommend_by_content_rating,
-            "3": recommend_by_genre,
-            "4": recommend_by_author,
-            "5": recommend_by_actor,
-            "6": recommend_by_original_release_year,
-            "7": recommend_by_production_company
-        }
+            criteria_functions = {
+                "1": recommend_by_plot,
+                "2": recommend_by_content_rating,
+                "3": recommend_by_genre,
+                "4": recommend_by_author,
+                "5": recommend_by_actor,
+                "6": recommend_by_original_release_year,
+                "7": recommend_by_production_company
+            }
 
-        recommendation_func = criteria_functions.get(selected_criterion)
-        if recommendation_func:
-            result = recommendation_func(user_input)
-            recommendations = handle_result(result)
-        else:
-            recommendations = [f'No specific recommendations for "{user_input}"']
+            recommendation_func = criteria_functions.get(selected_criterion)
+            if recommendation_func:
+                result = recommendation_func(user_input)
 
-        return jsonify({"recommendations": recommendations})
+                if isinstance(result, dict) and "error" in result:
+                    return jsonify({'error': result['error']}), 400 
+                recommendations = result.get("recommendations", [])
+            else:
+                recommendations = [f'No specific recommendations for "{user_input}"']
 
-    return render_template('recommendations_system.html', user=current_user)
-
-def handle_result(result):
-    if isinstance(result, dict) and "error" in result:
-        return jsonify({'error': result['error']}), 400
-    return result.get("recommendations", [])
+            return jsonify({"recommendations": recommendations})
+        
+        return render_template('recommendations_system.html', user=current_user)

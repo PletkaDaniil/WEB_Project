@@ -1,7 +1,7 @@
-from flask import Flask
+from flask import Flask, request
 from flask_sqlalchemy import SQLAlchemy
 from os import path
-from flask_login import LoginManager
+from flask_login import LoginManager, current_user
 import pandas as pd
 
 db = SQLAlchemy()
@@ -13,13 +13,25 @@ def create_app():
     app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{DB_NAME}"
     db.init_app(app)
 
+    @app.after_request
+    def log_request(response):
+        if current_user.is_authenticated:
+            log_entry = Log(
+                action=f"{request.method} {request.path}",
+                user_id=current_user.id,
+                details=f"Status code: {response.status_code}, IP: {request.remote_addr}"
+            )
+            db.session.add(log_entry)
+            db.session.commit()
+        return response
+
     from .views import views
     from .auth import auth
 
     app.register_blueprint(views, url_prefix="/")
     app.register_blueprint(auth, url_prefix="/")
 
-    from .models import User, Post, Comment, Like, Movie
+    from .models import User, Post, Comment, Like, Movie, Log
 
     create_database(app)
 

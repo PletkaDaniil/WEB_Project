@@ -12,6 +12,7 @@ class User(db.Model, UserMixin):
     posts = db.relationship('Post', backref='user', passive_deletes=True)
     comments = db.relationship('Comment', backref='user', passive_deletes=True)
     likes = db.relationship('Like', backref='user', passive_deletes=True)
+    logs = db.relationship('Log', backref='logs', passive_deletes=True)
 
 
 class Post(db.Model):
@@ -56,3 +57,10 @@ class Movie(db.Model):
     runtime = db.Column(db.Integer)
     production_company = db.Column(db.String(100))
     rating = db.Column(db.Float)
+
+class Log(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    date_created = db.Column(db.DateTime(timezone=True), default=func.now())
+    action = db.Column(db.String(50))
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    details = db.Column(db.Text)
