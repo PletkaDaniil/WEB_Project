@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Posts for {{ tag_name }}{% endblock %}
+
+{% block content %}
+<h1 align="center">Posts tagged with "{{ tag_name|replace('#', '') }}"</h1>
+
+{% if no_posts %}
+<div align="center" style="margin-top: 20px;">
+    <p class="text-muted">No posts found with the tag "{{ tag_name }}".</p>
+</div>
+{% else %}
+<div id="posts">
+    {% for post in posts %}
+    <div class="card border-dark">
+        <div class="card-header">
+            <a href="/posts/{{post.user.username}}">{{post.user.username}}</a>
+        </div>
+        <div class="card-body">
+            <p class="card-text">{{ post.text }}</p>
+        </div>
+        <div class="card-footer text-muted">{{ post.date_created }}</div>
+    </div>
+    <br />
+    {% endfor %}
+</div>
+{% endif %}
+{% endblock %}

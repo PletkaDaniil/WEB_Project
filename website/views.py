@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, flash, redirect, url_for, jsonify
 from flask_login import login_required, current_user
-from .models import Post, User, Comment, Like
+from .models import Post, User, Comment, Like, Tag
 from . import db
 from .recommendation_func import recommend_by_genre,recommend_by_content_rating, recommend_by_author, recommend_by_actor, recommend_by_original_release_year, recommend_by_production_company, recommend_by_plot
 
@@ -19,17 +19,37 @@ def home():
 def create_post():
     if request.method == "POST":
         text = request.form.get('text')
+        raw_tags = request.form.get('tags')
+        tag_names = {
+            tag.strip() if tag.startswith("#") else f"#{tag.strip()}"
+            for tag in raw_tags.split()
+        }
 
         if not text:
             flash('Post cannot be empty', category='error')
+        elif not raw_tags:
+            flash('Tags cannot be empty', category='error')
         else:
+            tag_names = {tag.strip() for tag in raw_tags.split() if tag.startswith("#")}
+            if len(tag_names) > 15:
+                flash('You can add up to 15 tags.', category='error')
+                return redirect(url_for('views.create_post'))
+
             post = Post(text=text, author=current_user.id)
             db.session.add(post)
             db.session.commit()
-            flash('Post created!', category='success')
+
+            for tag_name in tag_names:
+                tag = Tag(name=tag_name, author=current_user.id, post_id=post.id)
+                db.session.add(tag)
+
+            db.session.commit()
+
+            flash('Post created with tags!', category='success')
             return redirect(url_for('views.home'))
 
     return render_template('create_post.html', user=current_user)
+
 
 
 @views.route("/delete-post/<id>")
@@ -68,6 +88,24 @@ def posts(username):
 
     posts = user.posts
     return render_template("posts.html", user=current_user, posts=posts, username=username)
+
+
+@views.route("/tags/<tag_name>")
+@login_required
+def posts_by_tag(tag_name):
+    if not tag_name.startswith("#"):
+        tag_name = f"#{tag_name}"
+
+    tags = Tag.query.filter_by(name=tag_name).all()
+
+    if not tags:
+        return render_template("tag_posts.html", user=current_user, posts=[], tag_name=tag_name, no_posts=True)
+
+    post_ids = [tag.post_id for tag in tags]
+    posts = Post.query.filter(Post.id.in_(post_ids)).all()
+
+    return render_template("tag_posts.html", user=current_user, posts=posts, tag_name=tag_name)
+
 
 
 @views.route("/create-comment/<post_id>", methods=['POST'])
@@ -116,7 +154,6 @@ def like(post_id):
     if not post:
         return jsonify({'error': 'Post does not exist.'}, 400)
     elif like:
-        
         db.session.delete(like)
         db.session.commit()
     else:

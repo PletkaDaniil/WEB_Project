@@ -12,8 +12,8 @@ class User(db.Model, UserMixin):
     posts = db.relationship('Post', backref='user', passive_deletes=True)
     comments = db.relationship('Comment', backref='user', passive_deletes=True)
     likes = db.relationship('Like', backref='user', passive_deletes=True)
-    logs = db.relationship('Log', backref='logs', passive_deletes=True)
-
+    logs = db.relationship('Log', backref='user', passive_deletes=True)
+    tags = db.relationship('Tag', backref='user', passive_deletes=True)
 
 class Post(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -23,6 +23,7 @@ class Post(db.Model):
         'user.id', ondelete="CASCADE"), nullable=False)
     comments = db.relationship('Comment', backref='post', passive_deletes=True)
     likes = db.relationship('Like', backref='post', passive_deletes=True)
+    tags = db.relationship('Tag', backref='post', passive_deletes=True)
 
 
 class Comment(db.Model):
@@ -64,3 +65,12 @@ class Log(db.Model):
     action = db.Column(db.String(50))
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     details = db.Column(db.Text)
+
+class Tag(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    date_created = db.Column(db.DateTime(timezone=True), default=func.now())
+    author = db.Column(db.Integer, db.ForeignKey(
+        'user.id', ondelete="CASCADE"), nullable=False)
+    post_id = db.Column(db.Integer, db.ForeignKey(
+        'post.id', ondelete="CASCADE"), nullable=False)
