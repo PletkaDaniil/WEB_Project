@@ -2,16 +2,28 @@ from flask import Flask, request
 from flask_sqlalchemy import SQLAlchemy
 from os import path
 from flask_login import LoginManager, current_user
+from flask_mail import Mail, Message
 import pandas as pd
 
 db = SQLAlchemy()
 DB_NAME = "database.db"
+mail = Mail()
 
 def create_app():
     app = Flask(__name__)
     app.config["SECRET_KEY"] = "hello_world"
     app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{DB_NAME}"
+
+    app.config["MAIL_SERVER"] = "smtp.gmail.com"
+    app.config["MAIL_PORT"] = 587
+    app.config["MAIL_USE_TLS"] = True
+    app.config["MAIL_USE_SSL"] = False
+    app.config["MAIL_USERNAME"] = "" #"your_email@gmail.com"
+    app.config["MAIL_PASSWORD"] = "" #"your_password"
+    app.config["MAIL_DEFAULT_SENDER"] = "" #"your_email@gmail.com"
+
     db.init_app(app)
+    mail.init_app(app)
 
     @app.after_request
     def log_request(response):

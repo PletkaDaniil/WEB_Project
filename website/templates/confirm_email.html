@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h3>Confirm Your Email</h3>
+<form method="POST">
+    <label for="confirmation_code">Confirmation Code</label>
+    <input type="text" name="confirmation_code" id="confirmation_code" required>
+    <button type="submit">Confirm</button>
+</form>
+{% endblock %}

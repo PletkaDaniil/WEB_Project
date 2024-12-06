@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, redirect, url_for, request, flash, session, abort
 from .models import User
-from . import db
+from . import db, mail
 from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 import re
@@ -11,12 +11,13 @@ from google.oauth2 import id_token
 import requests
 from pip._vendor import cachecontrol
 import google.auth.transport.requests
+from flask_mail import Message
+import random
 
 auth = Blueprint("auth", __name__)
 
 os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
 
-# Настройки для Google OAuth
 GOOGLE_CLIENT_ID = "325915715071-aiemmsuu0pm46jeloal67d1ncu83sh97.apps.googleusercontent.com"
 client_secrets_file = os.path.join(pathlib.Path(__file__).parent, "client_secret.json")
 
@@ -98,7 +99,6 @@ def logout():
     logout_user()
     return redirect(url_for("views.home"))
 
-
 @auth.route("/sign-up", methods=["GET", "POST"])
 def sign_up():
     if request.method == "POST":
@@ -123,11 +123,48 @@ def sign_up():
         elif not is_email_valid(email):
             flash("Invalid email address. Please enter a valid email.", category="error")
         else:
-            new_user = User(email=email, username=username, password=generate_password_hash(first_password, method='pbkdf2:sha256'))
-            db.session.add(new_user)
-            db.session.commit()
-            login_user(new_user, remember=True)
-            flash("User created!", category="success")
-            return redirect(url_for("views.home"))
+            confirmation_code = random.randint(100000, 999999)
+            session["confirmation_code"] = confirmation_code
+            session["pending_user"] = {
+                "email": email,
+                "username": username,
+                "password": generate_password_hash(first_password, method='pbkdf2:sha256')
+            }
+            
+            msg = Message(
+                subject="Email Confirmation Code",
+                sender="your_email@gmail.com",
+                recipients=[email]
+            )
+            msg.body = f"Your confirmation code is: {confirmation_code}"
+            mail.send(msg)
+
+            flash("Confirmation code sent to your email. Please check your inbox.", category="info")
+            return redirect(url_for("auth.confirm_email"))
 
     return render_template("sign_up.html", user=current_user)
+
+
+@auth.route("/confirm-email", methods=["GET", "POST"])
+def confirm_email():
+    if request.method == "POST":
+        entered_code = request.form.get("confirmation_code")
+        if str(session.get("confirmation_code")) == entered_code:
+            pending_user = session.get("pending_user")
+            if pending_user:
+                new_user = User(
+                    email=pending_user["email"],
+                    username=pending_user["username"],
+                    password=pending_user["password"]
+                )
+                db.session.add(new_user)
+                db.session.commit()
+                session.pop("confirmation_code", None)
+                session.pop("pending_user", None)
+                flash("Email confirmed and user created!", category="success")
+                login_user(new_user, remember=True)
+                return redirect(url_for("views.home"))
+        else:
+            flash("Invalid confirmation code. Please try again.", category="error")
+
+    return render_template("confirm_email.html", user=current_user)
