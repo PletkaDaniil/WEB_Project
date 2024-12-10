@@ -1,4 +1,5 @@
-document.getElementById('criteria-select').addEventListener('change', function(e) {
+// Обработка выбора критерия
+document.getElementById('criteria-select').addEventListener('change', function (e) {
     const selectedValue = e.target.value;
     console.log("Selected value:", selectedValue);
 
@@ -52,14 +53,15 @@ document.getElementById('criteria-select').addEventListener('change', function(e
     hintContainer.style.display = 'block';
 });
 
-document.getElementById('rec-form').addEventListener('submit', function(e) {
+// Отправка формы для получения рекомендаций
+document.getElementById('rec-form').addEventListener('submit', function (e) {
     e.preventDefault();
 
     const criterionSelect = document.getElementById('criteria-select').value;
     const userInput = document.getElementById('criteria-input').value;
     const outputDiv = document.getElementById('recommendation-output');
 
-    if (criterionSelect === "Select a criterion for building a recommendation") {
+    if (!criterionSelect || !userInput) {
         showError('Please select a criterion and provide input.');
         return;
     }
@@ -74,39 +76,58 @@ document.getElementById('rec-form').addEventListener('submit', function(e) {
             'criteria-input': userInput
         })
     })
-    .then(response => {
-        if (!response.ok) {
-            return response.json().then(data => {
-                throw new Error(data.error || 'Failed to fetch recommendations.');
-            });
-        }
-        return response.json();
-    })
-    .then(data => {
-        outputDiv.innerHTML = '';
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(data => {
+                    throw new Error(data.error || 'Failed to fetch recommendations.');
+                });
+            }
+            return response.json();
+        })
+        .then(data => {
+            outputDiv.innerHTML = ''; // Очистить предыдущий вывод
 
-        if (data.recommendations && data.recommendations.length > 0) {
-            const box = document.createElement('div');
-            box.className = 'recommendation-box';
+            if (data.recommendations && data.recommendations.length > 0) {
+                const box = document.createElement('div');
+                box.className = 'recommendation-box';
 
-            data.recommendations.forEach(rec => {
-                const recommendation = document.createElement('p');
-                recommendation.textContent = rec;
-                box.appendChild(recommendation);
-            });
+                data.recommendations.forEach(rec => {
+                    const movieDiv = document.createElement('div');
+                    movieDiv.className = 'movie-item';
 
-            outputDiv.appendChild(box);
-        } else {
-            showError('No recommendations found for the given input.');
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        showError(error.message || 'An error occurred while processing your request.');
-    });
+                    // Название фильма
+                    const movieTitle = document.createElement('h3');
+                    movieTitle.textContent = rec.title;
+                    movieDiv.appendChild(movieTitle);
+
+                    // Постер фильма
+                    if (rec.poster_url) {
+                        const moviePoster = document.createElement('img');
+                        moviePoster.src = rec.poster_url;
+                        moviePoster.alt = `Poster for ${rec.title}`;
+                        moviePoster.className = 'movie-poster';
+                        movieDiv.appendChild(moviePoster);
+                    } else {
+                        const noPosterText = document.createElement('p');
+                        noPosterText.textContent = 'Poster not available';
+                        movieDiv.appendChild(noPosterText);
+                    }
+
+                    box.appendChild(movieDiv);
+                });
+
+                outputDiv.appendChild(box);
+            } else {
+                showError('No recommendations found for the given input.');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showError(error.message || 'An error occurred while processing your request.');
+        });
 });
 
-
+// Функции для вывода ошибок
 function showError(message) {
     const errorDiv = document.getElementById('error-output');
     errorDiv.innerHTML = `

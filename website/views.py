@@ -3,6 +3,8 @@ from flask_login import login_required, current_user
 from .models import Post, User, Comment, Like, Tag
 from . import db
 from .recommendation_func import recommend_by_genre,recommend_by_content_rating, recommend_by_author, recommend_by_actor, recommend_by_original_release_year, recommend_by_production_company, recommend_by_plot
+import requests
+import re
 
 views = Blueprint("views", __name__)
 
@@ -164,36 +166,66 @@ def like(post_id):
     return jsonify({"likes": len(post.likes), "liked": current_user.id in map(lambda x: x.author, post.likes)})
 
 
+def fetch_movie_poster(movie_title):
+    movie_title = re.sub(r'^\d+\.\s*', '', movie_title)
+    movie_title = re.sub(r'\(\d{4}\)$', '', movie_title).strip()
+    api_key = "" #your_key
+    url = f"http://www.omdbapi.com/?t={movie_title}&apikey={api_key}"
+    try:
+        response = requests.get(url)
+        if response.status_code == 200:
+            data = response.json()
+            if data.get("Response") == "True":
+                return data.get("Poster", None)
+            else:
+                return {"error": data.get("Error")}
+        else:
+            return {"error": "Failed to connect to OMDb API."}
+    except Exception as e:
+        return {"error": str(e)}
+
 @views.route("/recommendations-system", methods=['GET', 'POST'])
 @login_required
 def recommendation_list():
-        if request.method == 'POST':
-            selected_criterion = request.form.get('criterion')
-            user_input = request.form.get('criteria-input')
+    if request.method == 'POST':
+        selected_criterion = request.form.get('criterion')
+        user_input = request.form.get('criteria-input')
 
-            if not user_input:
-                return jsonify({'error': 'The input cannot be empty'}), 400
+        if not user_input:
+            return jsonify({'error': 'The input cannot be empty'}), 400
 
-            criteria_functions = {
-                "1": recommend_by_plot,
-                "2": recommend_by_content_rating,
-                "3": recommend_by_genre,
-                "4": recommend_by_author,
-                "5": recommend_by_actor,
-                "6": recommend_by_original_release_year,
-                "7": recommend_by_production_company
-            }
+        criteria_functions = {
+            "1": recommend_by_plot,
+            "2": recommend_by_content_rating,
+            "3": recommend_by_genre,
+            "4": recommend_by_author,
+            "5": recommend_by_actor,
+            "6": recommend_by_original_release_year,
+            "7": recommend_by_production_company
+        }
 
-            recommendation_func = criteria_functions.get(selected_criterion)
-            if recommendation_func:
-                result = recommendation_func(user_input)
+        recommendation_func = criteria_functions.get(selected_criterion)
+        if recommendation_func:
+            result = recommendation_func(user_input)
 
-                if isinstance(result, dict) and "error" in result:
-                    return jsonify({'error': result['error']}), 400 
-                recommendations = result.get("recommendations", [])
-            else:
-                recommendations = [f'No specific recommendations for "{user_input}"']
+            if isinstance(result, dict) and "error" in result:
+                return jsonify({'error': result['error']}), 400
 
-            return jsonify({"recommendations": recommendations})
-        
-        return render_template('recommendations_system.html', user=current_user)
+            recommendations = result.get("recommendations", [])
+            
+            recommendations_with_posters = []
+            for movie in recommendations:
+                if isinstance(movie, str):
+                    movie = {'title': str(movie)}
+                
+                poster_url = fetch_movie_poster(movie['title'])
+                print(f"Movie: {movie['title']}")
+                print(f"Poster URL: {poster_url}")
+                movie['poster_url'] = poster_url if isinstance( poster_url, str) else None
+                recommendations_with_posters.append(movie)
+        else:
+            recommendations_with_posters = [{"title": f"No specific recommendations for '{user_input}'", "poster_url": None}]
+
+        return jsonify({"recommendations": recommendations_with_posters})
+
+    return render_template('recommendations_system.html', user=current_user)

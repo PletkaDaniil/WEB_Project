@@ -115,6 +115,19 @@
     word-wrap: break-word;
 }
 
+.movie-item {
+    border: 1px solid #ddd;
+    padding: 10px;
+    margin: 10px;
+    text-align: center;
+}
+
+.movie-poster {
+    max-width: 200px;
+    max-height: 300px;
+    margin: 10px 0;
+}
+
 .error-message {
     margin: 0;
 }
