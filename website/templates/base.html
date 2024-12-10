@@ -17,22 +17,35 @@
     <title>{% block title %}{% endblock %}</title>
     
     <style>
-      body {
-          display: none;
-      }
-      #loading {
-          position: fixed;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          z-index: 9999;
-          background-color: white;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-      }
-    </style>
+         body {
+            display: none;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #9e66d0, #75a4e4);
+            background-attachment: fixed;
+            background-size: cover;
+            font-family: 'Arial', sans-serif;
+        }
+        #loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 9999;
+            background-color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .navbar-dark {
+            background-color: rgba(0, 0, 0, 0.7);
+        }
+        .container {
+            padding-top: 20px;
+        }
+      </style>
+      
 </head>
 <body>
 

@@ -1,10 +1,17 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h3>Confirm Your Email</h3>
-<form method="POST">
-    <label for="confirmation_code">Confirmation Code</label>
-    <input type="text" name="confirmation_code" id="confirmation_code" required>
-    <button type="submit">Confirm</button>
-</form>
+
+<link rel="stylesheet" href="{{ url_for('static', filename='css/log.css') }}">
+
+<div class="centered-container">
+    <div class="form-card">
+        <h3>Confirm Your Email</h3>
+        <form method="POST">
+            <label for="confirmation_code">Confirmation Code</label>
+            <input type="text" name="confirmation_code" id="confirmation_code" placeholder="Enter code">
+            <button type="submit">Confirm</button>
+        </form>
+    </div>
+</div>
 {% endblock %}
