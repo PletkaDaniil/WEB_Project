@@ -1,49 +1,32 @@
 {% extends "base.html" %} {% block title %}Home{% endblock %} {% block content
   %}
-  <h1 align="center">{% block header %}Posts{% endblock %}</h1>
-  <div style="display: flex; align-items: center; justify-content: space-between;">
-    <div style="display: flex; align-items: center; margin-right: auto;">
-      <form id="tagSearchForm" onsubmit="return redirectToTagPage();" style="display: flex; align-items: center;">
-        <input
-          type="search"
-          id="mySearch"
-          name="q"
-          placeholder="Search by tag…"
-          style="padding: 10px; font-size: 15px; border: 1px solid #ccc; border-radius: 4px; margin-right: 10px; width: 300px;"
-        />
-        <button
-          type="submit"
-          style="padding: 10px 15px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;"
-        >
-          Search
-        </button>
-      </form>
-    </div>
-    
-    <div style="display: flex; gap: 10px;">
-      <a href="/create-post">
-        <button
-          type="button"
-          class="btn btn-primary btn-lg"
-          style="padding: 10px 15px; border-radius: 4px; font-size: 16px;"
-        >
-          Create a rec-post
-        </button>
-      </a>
-      <a href="/recommendations-system">
-        <button
-          type="button"
-          class="btn btn-info btn-lg"
-          style="padding: 10px 15px; border-radius: 4px; font-size: 16px;"
-        >
-          Rec-list
-        </button>
-      </a>
-    </div>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/posts.css') }}">
+  <div class="centered-container">
+      <div class="form-card">
+          <h1 class="header">{% block header %}Recommendation Posts{% endblock %}</h1>
+          <div class="search-container">
+              <form id="tagSearchForm" onsubmit="return redirectToTagPage();" class="search-form">
+                  <input
+                      type="search"
+                      id="mySearch"
+                      name="q"
+                      placeholder="Search by tag…"
+                  />
+                  <button type="submit" class="search-button">Search</button>
+              </form>
+          </div>
+          <div class="actions-container">
+              <a href="/create-post">
+                  <button type="button" class="btn-primary">Create a rec-post</button>
+              </a>
+              <a href="/recommendations-system">
+                  <button type="button" class="btn-info">Rec-list</button>
+              </a>
+          </div>
+          <div id="error-output" class="error-message-container" style="display: none; margin-top: 20px;"></div>
+      </div>
   </div>
-  
 
-  <br/>
   <div id="posts">
     {% for post in posts %}
     <div class="card border-dark">
@@ -81,7 +64,7 @@
         </div>
       </div>
       <div class="card-body">
-        <div class="card-text">{{post.text}}</div>
+        <div class="card-text">{{ post.text|replace('\n', '<br>')|safe }}</div>
         <br />
        
         {% if post.tags|length > 0 %}

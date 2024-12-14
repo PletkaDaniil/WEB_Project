@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, flash, redirect, url_for, jsonify
+from flask import Blueprint, render_template, request, flash, redirect, url_for, jsonify, current_app
 from flask_login import login_required, current_user
 from .models import Post, User, Comment, Like, Tag
 from . import db
@@ -13,7 +13,8 @@ views = Blueprint("views", __name__)
 @login_required
 def home():
     posts = Post.query.all()
-    return render_template("home.html", user=current_user, posts=posts)
+    posts_sorted_by_likes = sorted(posts, key=lambda post: len(post.likes), reverse=True)
+    return render_template("home.html", user=current_user, posts=posts_sorted_by_likes)
 
 
 @views.route("/create-post", methods=['GET', 'POST'])
@@ -22,17 +23,19 @@ def create_post():
     if request.method == "POST":
         text = request.form.get('text')
         raw_tags = request.form.get('tags')
-        tag_names = {
-            tag.strip() if tag.startswith("#") else f"#{tag.strip()}"
-            for tag in raw_tags.split()
-        }
+        tag_names = []
+        for tag in raw_tags.split():
+            tag = tag.strip().lower()
+            if not tag.startswith("#"):
+                tag = "#" + tag
+            tag_names.append(tag)
 
+        tag_names = set(tag_names)
         if not text:
             flash('Post cannot be empty', category='error')
         elif not raw_tags:
             flash('Tags cannot be empty', category='error')
         else:
-            tag_names = {tag.strip() for tag in raw_tags.split() if tag.startswith("#")}
             if len(tag_names) > 15:
                 flash('You can add up to 15 tags.', category='error')
                 return redirect(url_for('views.create_post'))
@@ -53,7 +56,6 @@ def create_post():
     return render_template('create_post.html', user=current_user)
 
 
-
 @views.route("/delete-post/<id>")
 @login_required
 def delete_post(id):
@@ -64,6 +66,10 @@ def delete_post(id):
     elif current_user.id != post.author:
         flash('You do not have permission to delete this post.', category='error')
     else:
+        tags = Tag.query.filter_by(post_id=post.id).all()
+        for tag in tags:
+            db.session.delete(tag)
+
         comments = Comment.query.filter_by(post_id=post.id).all()
         for comment in comments:
             db.session.delete(comment)
@@ -88,13 +94,15 @@ def posts(username):
         flash('No user with that username exists.', category='error')
         return redirect(url_for('views.home'))
 
-    posts = user.posts
+    posts = sorted(user.posts, key=lambda post: len(post.likes), reverse=True)
+
     return render_template("posts.html", user=current_user, posts=posts, username=username)
 
 
 @views.route("/tags/<tag_name>")
 @login_required
 def posts_by_tag(tag_name):
+    tag_name = tag_name.strip().lower()
     if not tag_name.startswith("#"):
         tag_name = f"#{tag_name}"
 
@@ -105,9 +113,9 @@ def posts_by_tag(tag_name):
 
     post_ids = [tag.post_id for tag in tags]
     posts = Post.query.filter(Post.id.in_(post_ids)).all()
+    posts = sorted(posts, key=lambda post: len(post.likes), reverse=True)
 
     return render_template("tag_posts.html", user=current_user, posts=posts, tag_name=tag_name)
-
 
 
 @views.route("/create-comment/<post_id>", methods=['POST'])
@@ -124,6 +132,7 @@ def create_comment(post_id):
                 text=text, author=current_user.id, post_id=post_id)
             db.session.add(comment)
             db.session.commit()
+            flash('Comment added successfully!', category='success')
         else:
             flash('Post does not exist.', category='error')
 
@@ -150,26 +159,30 @@ def delete_comment(comment_id):
 @login_required
 def like(post_id):
     post = Post.query.filter_by(id=post_id).first()
-    like = Like.query.filter_by(
-        author=current_user.id, post_id=post_id).first()
-
     if not post:
-        return jsonify({'error': 'Post does not exist.'}, 400)
-    elif like:
+        return jsonify({'error': 'Post does not exist.'}), 400
+
+    like = Like.query.filter_by(author=current_user.id, post_id=post_id).first()
+
+    if like:
         db.session.delete(like)
         db.session.commit()
     else:
         like = Like(author=current_user.id, post_id=post_id)
-        db.session.add(like)
+        db.session.add(like) 
         db.session.commit()
 
-    return jsonify({"likes": len(post.likes), "liked": current_user.id in map(lambda x: x.author, post.likes)})
+    db.session.refresh(post)
 
+    return jsonify({
+        "likes": len(post.likes),
+        "liked": current_user.id in [like.author for like in post.likes]
+    })
 
 def fetch_movie_poster(movie_title):
     movie_title = re.sub(r'^\d+\.\s*', '', movie_title)
     movie_title = re.sub(r'\(\d{4}\)$', '', movie_title).strip()
-    api_key = "" #your_key
+    api_key = current_app.config.get("API_KEY") #your_key
     url = f"http://www.omdbapi.com/?t={movie_title}&apikey={api_key}"
     try:
         response = requests.get(url)
@@ -183,6 +196,7 @@ def fetch_movie_poster(movie_title):
             return {"error": "Failed to connect to OMDb API."}
     except Exception as e:
         return {"error": str(e)}
+
 
 @views.route("/recommendations-system", methods=['GET', 'POST'])
 @login_required
@@ -212,15 +226,12 @@ def recommendation_list():
                 return jsonify({'error': result['error']}), 400
 
             recommendations = result.get("recommendations", [])
-            
             recommendations_with_posters = []
             for movie in recommendations:
                 if isinstance(movie, str):
                     movie = {'title': str(movie)}
-                
+                print(movie['title'])
                 poster_url = fetch_movie_poster(movie['title'])
-                print(f"Movie: {movie['title']}")
-                print(f"Poster URL: {poster_url}")
                 movie['poster_url'] = poster_url if isinstance( poster_url, str) else None
                 recommendations_with_posters.append(movie)
         else:

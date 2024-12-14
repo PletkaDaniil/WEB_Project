@@ -4,6 +4,7 @@ from os import path
 from flask_login import LoginManager, current_user
 from flask_mail import Mail, Message
 import pandas as pd
+import json
 
 db = SQLAlchemy()
 DB_NAME = "database.db"
@@ -11,6 +12,7 @@ mail = Mail()
 
 def create_app():
     app = Flask(__name__)
+    config_data = load_config_from_json()
     app.config["SECRET_KEY"] = "hello_world"
     app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{DB_NAME}"
 
@@ -18,9 +20,10 @@ def create_app():
     app.config["MAIL_PORT"] = 587
     app.config["MAIL_USE_TLS"] = True
     app.config["MAIL_USE_SSL"] = False
-    app.config["MAIL_USERNAME"] = "" #"your_email@gmail.com"
-    app.config["MAIL_PASSWORD"] = "" #"your_password"
-    app.config["MAIL_DEFAULT_SENDER"] = "" #"your_email@gmail.com"
+    app.config["MAIL_USERNAME"] = config_data["MAIL_USERNAME"] #"your_email@gmail.com"
+    app.config["MAIL_PASSWORD"] = config_data["MAIL_PASSWORD"] #"your_password"
+    app.config["MAIL_DEFAULT_SENDER"] = config_data["MAIL_DEFAULT_SENDER"] #"your_email@gmail.com"
+    app.config["API_KEY"] = config_data["api_key"] #api_for_posters
 
     db.init_app(app)
     mail.init_app(app)
@@ -61,6 +64,10 @@ def create_app():
 
     return app
 
+def load_config_from_json():
+    with open("website/user_server.json") as f:
+        config_data = json.load(f)
+    return config_data['user']
 
 def create_database(app):
     if not path.exists("website/" + DB_NAME):

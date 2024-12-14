@@ -13,18 +13,34 @@ from pip._vendor import cachecontrol
 import google.auth.transport.requests
 from flask_mail import Message
 import random
+import json
 
 auth = Blueprint("auth", __name__)
 
 os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
 
-GOOGLE_CLIENT_ID = "325915715071-aiemmsuu0pm46jeloal67d1ncu83sh97.apps.googleusercontent.com"
 client_secrets_file = os.path.join(pathlib.Path(__file__).parent, "client_secret.json")
 
-flow = Flow.from_client_secrets_file(
-    client_secrets_file=client_secrets_file,
+with open(client_secrets_file, "r") as f:
+    client_data = json.load(f)
+
+GOOGLE_CLIENT_ID = client_data['web']['client_id']
+GOOGLE_CLIENT_SECRET = client_data['web']['client_secret']
+REDIRECT_URI = client_data['web']['redirect_uris'][0]
+
+flow = Flow.from_client_config(
+    {
+        "web": {
+            "client_id": GOOGLE_CLIENT_ID,
+            "client_secret": GOOGLE_CLIENT_SECRET,
+            "redirect_uris": [REDIRECT_URI],
+            "auth_uri": client_data['web']['auth_uri'],
+            "token_uri": client_data['web']['token_uri'],
+            "auth_provider_x509_cert_url": client_data['web']['auth_provider_x509_cert_url'],
+        }
+    },
     scopes=["https://www.googleapis.com/auth/userinfo.profile", "https://www.googleapis.com/auth/userinfo.email", "openid"],
-    redirect_uri="http://127.0.0.1:5000/callback"
+    redirect_uri=REDIRECT_URI
 )
 
 def is_email_valid(email):
@@ -83,7 +99,7 @@ def callback():
         new_user = User(
             email=email,
             username=name,
-            password=generate_password_hash(email, method='pbkdf2:sha256')
+            password=generate_password_hash("auth11111go"+email+"canwe", method='pbkdf2:sha256')
         )
         db.session.add(new_user)
         db.session.commit()
@@ -116,7 +132,7 @@ def sign_up():
             flash("Username is already in use.", category="error")
         elif first_password != second_password:
             flash("Passwords don't match.", category="error")
-        elif len(username) < 2:
+        elif len(username) <= 2:
             flash("Username is too short.", category="error")
         elif len(first_password) < 6:
             flash("Password is too short.", category="error")

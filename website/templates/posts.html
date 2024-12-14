@@ -1,11 +1,155 @@
-{% extends "posts_div.html" %}
-
-{% block title %}{{username}}'s Posts{% endblock%}
-{% block header %} {{username}}'s posts {% endblock %}
-{% block footer %}
-<div align="center">
-    <a href="/home">
-        <button type="button" class="btn btn-primary btn-lg">Back</button>
-    </a>
-</div>
+{% extends "base.html" %} 
+{% block title %} {{username}}'s Posts {% endblock %} 
+{% block content %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/posts.css') }}">
+    <div class="centered-container">
+        <div class="form-card">
+            <h1 class="header">{% block header %} {{username}}'s posts {% endblock %}</h1>
+            <div class="search-container">
+                <form id="tagSearchForm" onsubmit="return redirectToTagPage();" class="search-form">
+                    <input
+                        type="search"
+                        id="mySearch"
+                        name="q"
+                        placeholder="Search by tag…"
+                    />
+                    <button type="submit" class="search-button">Search</button>
+                </form>
+            </div>
+            <div class="actions-container">
+                <a href="/create-post">
+                    <button type="button" class="btn-primary">Create a rec-post</button>
+                </a>
+                <a href="/recommendations-system">
+                    <button type="button" class="btn-info">Rec-list</button>
+                </a>
+            </div>
+            <div align="right" style="margin-top: 20px;">
+                <a href="/home">
+                    <button type="button" class="back-btn">Back</button>
+                </a>
+            </div>
+            <div id="error-output" class="error-message-container" style="display: none; margin-top: 20px;"></div>
+        </div>
+    </div>
+  
+    <div id="posts">
+      {% for post in posts %}
+      <div class="card border-dark">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <a href="/posts/{{post.user.username}}">{{post.user.username}}</a>
+          <div>
+            <span id="likes-count-{{post.id}}">{{ post.likes|length }}</span>
+            {% if user.id in post.likes|map(attribute="author")|list %}
+            <i
+              class="fas fa-thumbs-up"
+              id="like-button-{{post.id}}"
+              onclick="like('{{ post.id }}')"
+            ></i>
+            {% else %}
+            <i
+              class="far fa-thumbs-up"
+              id="like-button-{{post.id}}"
+              onclick="like('{{ post.id }}')"
+            ></i>
+            {% endif %}
+            {% if user.id == post.author %}
+            <div class="btn-group">
+              <button
+                type="button"
+                class="btn btn-sm btn-primary dropdown-toggle"
+                data-bs-toggle="dropdown"
+              ></button>
+              <ul class="dropdown-menu">
+                <li>
+                  <a href="/delete-post/{{post.id}}" class="dropdown-item">Delete</a>
+                </li>
+              </ul>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="card-text">{{ post.text|replace('\n', '<br>')|safe }}</div>
+          <br />
+         
+          {% if post.tags|length > 0 %}
+          <div class="tags mb-2">
+            {% for tag in post.tags %}
+            <a href="/tags/{{ tag.name|replace('#', '') }}" class="badge bg-info text-dark">
+              {{ tag.name }}
+            </a>
+            {% endfor %}
+          </div>
+          {% endif %}
+          
+          <div class="collapse" id="comments-{{post.id}}">
+            <div class="card">
+              <div class="card-body" id="comments-expanded-{{post.id}}">
+                {% for comment in post.comments %}
+                <div class="d-flex justify-content-between align-items-center">
+                  <div>
+                    <a href="/posts/{{comment.user.username}}">{{comment.user.username}}</a>: {{comment.text}}
+                  </div>
+                  <div>
+                    <small class="text-muted">{{comment.date_created}}</small>
+                    {% if user.id == comment.author or user.id == post.author %}
+                    <div class="btn-group">
+                      <button
+                        type="button"
+                        class="btn btn-sm btn-primary dropdown-toggle"
+                        data-bs-toggle="dropdown"
+                      ></button>
+                      <ul class="dropdown-menu">
+                        <li>
+                          <a
+                            href="/delete-comment/{{comment.id}}"
+                            class="dropdown-item"
+                            >Delete</a
+                          >
+                        </li>
+                      </ul>
+                    </div>
+                    {% endif %}
+                  </div>
+                </div>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+          <p class="card-text">
+            {% if post.comments|length > 0 %}
+            <a data-bs-toggle="collapse" href="#comments-{{post.id}}" role="button">
+              <small>View {{post.comments|length}} Comments</small>
+            </a>
+            {% else %}
+            <small class="text-muted">No Comments</small>
+            {% endif %}
+          </p>
+          <form
+            class="input-group mb-3"
+            method="POST"
+            action="/create-comment/{{post.id}}"
+          >
+            <input
+              type="text"
+              id="text"
+              name="text"
+              class="form-control"
+              placeholder="Comment something!"
+            />
+            <button type="submit" class="btn btn-primary">Comment</button>
+          </form>
+        </div>
+        <div class="card-footer text-muted">{{post.date_created}}</div>
+      </div>
+      <br />
+      {% endfor %}
+    </div> 
+  
+    <script
+        type="text/javascript"
+        src="{{ url_for('static', filename='js/tags.js')}}"
+      ></script>
+{% block footer %}{% endblock %} 
 {% endblock %}

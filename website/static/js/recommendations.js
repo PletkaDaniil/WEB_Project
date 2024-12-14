@@ -1,4 +1,3 @@
-// Обработка выбора критерия
 document.getElementById('criteria-select').addEventListener('change', function (e) {
     const selectedValue = e.target.value;
     console.log("Selected value:", selectedValue);
@@ -53,13 +52,13 @@ document.getElementById('criteria-select').addEventListener('change', function (
     hintContainer.style.display = 'block';
 });
 
-// Отправка формы для получения рекомендаций
 document.getElementById('rec-form').addEventListener('submit', function (e) {
     e.preventDefault();
 
     const criterionSelect = document.getElementById('criteria-select').value;
     const userInput = document.getElementById('criteria-input').value;
     const outputDiv = document.getElementById('recommendation-output');
+    const modal = document.getElementById('recommendation-modal');
 
     if (!criterionSelect || !userInput) {
         showError('Please select a criterion and provide input.');
@@ -85,22 +84,17 @@ document.getElementById('rec-form').addEventListener('submit', function (e) {
             return response.json();
         })
         .then(data => {
-            outputDiv.innerHTML = ''; // Очистить предыдущий вывод
+            outputDiv.innerHTML = '';
 
             if (data.recommendations && data.recommendations.length > 0) {
-                const box = document.createElement('div');
-                box.className = 'recommendation-box';
-
                 data.recommendations.forEach(rec => {
                     const movieDiv = document.createElement('div');
                     movieDiv.className = 'movie-item';
 
-                    // Название фильма
                     const movieTitle = document.createElement('h3');
                     movieTitle.textContent = rec.title;
                     movieDiv.appendChild(movieTitle);
 
-                    // Постер фильма
                     if (rec.poster_url) {
                         const moviePoster = document.createElement('img');
                         moviePoster.src = rec.poster_url;
@@ -113,12 +107,14 @@ document.getElementById('rec-form').addEventListener('submit', function (e) {
                         movieDiv.appendChild(noPosterText);
                     }
 
-                    box.appendChild(movieDiv);
+                    outputDiv.appendChild(movieDiv);
                 });
 
-                outputDiv.appendChild(box);
+                modal.style.display = 'block';
             } else {
-                showError('No recommendations found for the given input.');
+                const noRecText = document.createElement('p');
+                noRecText.textContent = 'No recommendations found for the given input.';
+                outputDiv.appendChild(noRecText);
             }
         })
         .catch(error => {
@@ -127,21 +123,37 @@ document.getElementById('rec-form').addEventListener('submit', function (e) {
         });
 });
 
-// Функции для вывода ошибок
-function showError(message) {
-    const errorDiv = document.getElementById('error-output');
-    errorDiv.innerHTML = `
-        <p class="error-message">${message}</p>
-        <button class="close-button" onclick="closeError()">✖</button>
-    `;
-    errorDiv.style.display = 'flex';
 
-    setTimeout(() => {
-        closeError();
-    }, 5000);
+document.getElementById('close-modal').addEventListener('click', function () {
+    document.getElementById('recommendation-modal').style.display = 'none';
+});
+
+
+
+let errorTimeout;
+function showError(message) {
+    const errorContainer = document.getElementById('error-output');
+
+    if (!errorContainer) {
+        console.error('Error container not found in the DOM.');
+        return;
+    }
+
+    errorContainer.innerHTML = `<p class="error-message">${message}</p>`;
+    errorContainer.style.display = 'flex';
+    errorContainer.classList.add('fadeInUp');
+
+    if (errorTimeout) {
+        clearTimeout(errorTimeout);
+    }
+
+    errorTimeout = setTimeout(() => {
+        closeError(); 
+    }, 3000);
 }
 
+
 function closeError() {
-    const errorDiv = document.getElementById('error-output');
-    errorDiv.style.display = 'none';
+    const errorContainer = document.getElementById('error-output');
+    errorContainer.style.display = 'none';
 }

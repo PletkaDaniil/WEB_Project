@@ -5,15 +5,10 @@ Home
 {% endblock %}
 
 {% block content %}
-<div id="error-output" class="error-message-container" style="display: none;"></div>
-<h1 align="center">Enjoy your recommendations</h1>
-<div align="right">
-    <a href="/home">
-        <button type="button" class="btn btn-lg btn-secondary">Back</button>
-    </a>
-</div>
 
 <form id="rec-form" class="form-container">
+    <h1 align="center">Enjoy your recommendations</h1>
+    </br>
     <label for="criteria-select" class="form-label">Choose a criterion:</label>
     <select id="criteria-select" class="form-select">
         <option selected disabled>Select a criterion for building a recommendation</option>
@@ -34,10 +29,23 @@ Home
         <p id="hint-text"></p>
     </div>
     <br/>
-    <button type="submit" class="submit-btn">Get Recommendations</button>
+    <div class="button-container">
+        <button type="submit" class="submit-btn">Get Recommendations</button>
+
+        <a href="/home">
+            <button type="button" class="back-btn">Back</button>
+        </a>
+    </div>
+    <div id="error-output" class="error-message-container" style="display: none; margin-top: 20px;"></div> 
 </form>
 
-<div id="recommendation-output" class="recommendation-output"></div>
+<div id="recommendation-modal" class="recommendation-modal">
+    <div class="modal-content">
+        <span class="close-button" id="close-modal">&times;</span>
+        <div id="recommendation-output" class="recommendation-output"></div>
+    </div>
+</div>
+
 <link rel="stylesheet" href="{{ url_for('static', filename='css/recommendations.css') }}">
 <script src="{{ url_for('static', filename='js/recommendations.js') }}"></script>
 

@@ -61,7 +61,7 @@ def recommend_by_content_rating(content_rating):
             Movie.info.isnot(None), Movie.info != '', Movie.info != '0',
             Movie.critics_consensus.isnot(None), Movie.critics_consensus != '', Movie.critics_consensus != '0',
             Movie.original_release_date.isnot(None), Movie.original_release_date != '', Movie.original_release_date != 0,
-        ).order_by(desc(Movie.rating)).limit(20).all()
+        ).order_by(desc(Movie.rating)).limit(8).all()
 
         for movie in movies:
             recommendations.append(f"{counter}. {movie.title} ({int(movie.original_release_date)})")
@@ -85,7 +85,7 @@ def recommend_by_genre(genre):
             Movie.info.isnot(None), Movie.info != '', Movie.info != '0',
             Movie.critics_consensus.isnot(None), Movie.critics_consensus != '', Movie.critics_consensus != '0',
             Movie.original_release_date.isnot(None), Movie.original_release_date != '', Movie.original_release_date != 0,
-        ).order_by(desc(Movie.rating)).limit(20).all()
+        ).order_by(desc(Movie.rating)).limit(8).all()
 
         for movie in movies:
             recommendations.append(f"{counter}. {movie.title} ({int(movie.original_release_date)})")
