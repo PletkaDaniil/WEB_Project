@@ -1,0 +1,13 @@
+Flask==3.1.0
+Flask_Login==0.6.3
+flask_mail==0.10.0
+flask_sqlalchemy==3.1.1
+google_auth_oauthlib==1.2.1
+pandas==2.2.3
+pip==24.3.1
+protobuf==5.29.1
+pytest==8.3.4
+Requests==2.32.3
+scikit_learn==1.6.0
+SQLAlchemy==2.0.35
+Werkzeug==3.1.3

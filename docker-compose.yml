@@ -1,0 +1,28 @@
+version: '3.9'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+    environment:
+      FLASK_APP: /app/app/main.py
+      FLASK_ENV: development
+      PYTHONPYCACHEPREFIX: "/dev/null"
+    volumes:
+      - .:/app
+    command: ["flask", "run", "--host=0.0.0.0", "--port=5000"]
+
+  tests:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      FLASK_ENV: testing
+      PYTHONPATH: /app/app
+      PYTHONPYCACHEPREFIX: "/dev/null"
+    volumes:
+      - .:/app
+    command: ["pytest", "-v"]
