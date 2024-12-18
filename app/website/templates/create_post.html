@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}
+Make a Post
+{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/create_post.css') }}">
+<div class="form-container">
+    <h1>Make a Post</h1>
+    </br>
+    <form method="POST" onsubmit="return handleSubmit(event);">
+        <textarea name="text" id="text" class="form-control" 
+                  placeholder="Enter your post content here..."></textarea>
+        <input type="text" name="tags" id="tags" class="form-control" 
+               placeholder="Enter tags separated by spaces, e.g. #new_tag" />
+               <br />
+        <button type="submit">Post</button>
+    </form>
+    <br />
+    <a href="/home">
+        <button type="button" class="back-button">Back</button>
+    </a>
+    
+</div>
+{% endblock %}

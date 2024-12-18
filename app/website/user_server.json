@@ -1,0 +1,8 @@
+{
+    "user":{
+            "MAIL_USERNAME": "movie.recommendation.site@gmail.com",
+            "MAIL_PASSWORD": "czxxnibeyzolpdtd",
+            "MAIL_DEFAULT_SENDER": "movie.recommendation.site@gmail.com",
+            "api_key": "f798d4db"
+        }
+}
