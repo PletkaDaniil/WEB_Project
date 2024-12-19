@@ -1,0 +1,41 @@
+<!ELEMENT TechnicalSpecification (Overview, Roles, Data, TechnicalSpecifications)>
+<!ELEMENT Overview (Description, Version, CreatedBy, Date)>
+<!ELEMENT Description (#PCDATA)>
+<!ELEMENT Version (#PCDATA)>
+<!ELEMENT CreatedBy (#PCDATA)>
+<!ELEMENT Date (#PCDATA)>
+
+<!ELEMENT Roles (Role+)>
+<!ELEMENT Role (Tool, Responsibility+)>
+<!ELEMENT Tool (#PCDATA)>
+<!ELEMENT Responsibility (#PCDATA)>
+
+<!ELEMENT Data (Elements)>
+<!ELEMENT Elements (Element+)>
+<!ELEMENT Element (Description, ChildElements?, Attributes?)>
+<!ATTLIST Element name CDATA #REQUIRED>
+<!ELEMENT ChildElements (Element+)>
+<!ELEMENT Attributes (Attribute+)>
+<!ELEMENT Attribute (Type, Required, Description)>
+<!ATTLIST Attribute name CDATA #REQUIRED>
+<!ELEMENT Type (#PCDATA)>
+<!ELEMENT Required (#PCDATA)>
+<!ELEMENT Description (#PCDATA)>
+
+<!ELEMENT TechnicalSpecifications (Type, DevTools, DBMS, Testing, Deployment)>
+<!ELEMENT Type (#PCDATA)>
+<!ELEMENT DevTools (Dev+)>
+<!ELEMENT Dev (#PCDATA)>
+<!ELEMENT DBMS (Tool, Reasoning)>
+<!ELEMENT Tool (#PCDATA)>
+<!ELEMENT Reasoning (#PCDATA)>
+<!ELEMENT Testing (Test+)>
+<!ELEMENT Test (#PCDATA)>
+
+<!ELEMENT Deployment (Containerization)>
+<!ELEMENT Containerization (Tool, Description, Dockerfile)>
+<!ELEMENT Dockerfile (BaseImage, WorkingDirectory, KeySteps)>
+<!ELEMENT BaseImage (#PCDATA)>
+<!ELEMENT WorkingDirectory (#PCDATA)>
+<!ELEMENT KeySteps (Step+)>
+<!ELEMENT Step (#PCDATA)>

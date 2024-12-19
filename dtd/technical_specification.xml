@@ -1,0 +1,269 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE TechnicalSpecification SYSTEM "technical_specification.dtd">
+
+<TechnicalSpecification>
+    <Overview>
+        <Description>
+            Technical specification for the database of a service that allows users to find movie recommendations based on their interests.
+            This is achieved through posts, comments, likes on posts, as well as tags and a large selection of movies.
+        </Description>
+        <Version>1.0</Version>
+        <CreatedBy>Pletka Daniil</CreatedBy>
+        <Date>2024-12-17</Date>
+    </Overview>
+
+    <Roles>
+        <Role>
+            <Tool>Admin</Tool>
+            <Responsibility>Manage users</Responsibility>
+            <Responsibility>Moderate content</Responsibility>
+        </Role>
+        <Role>
+            <Tool>User</Tool>
+
+            <Responsibility>A user can create, comment and like posts with recommendations for movies, actors and more. There is also a tagging system that allows for easy searching of desired recommendations.The service includes a built-in recommendation system that suggests content based on user preferences, such as a liked plot, actor, rating and more.</Responsibility>
+        </Role>
+    </Roles>
+
+    <Data>
+        <Elements>
+        <Element name="Users">
+            <Description>Contains information about the service's users.</Description>
+            <ChildElements>
+                <Element name="User">
+                    <Description>User of the service.</Description>
+                    <Attributes>
+                        <Attribute name="id">
+                            <Type>ID</Type>
+                            <Required>true</Required>
+                            <Description>Unique identifier for the user.</Description>
+                        </Attribute>
+                    </Attributes>
+                    <ChildElements>
+                        <Element name="Email">
+                            <Description>User's email.</Description>
+                        </Element>
+                        <Element name="Username">
+                            <Description>User's username.</Description>
+                        </Element>
+                        <Element name="Password">
+                            <Description>User's password.</Description>
+                        </Element>
+                        <Element name="Date_Created">
+                            <Description>User's creation date.</Description>
+                        </Element>
+                    </ChildElements>
+                </Element>
+            </ChildElements>
+        </Element>
+
+        <Element name="Posts">
+            <Description>Contains information about users' posts.</Description>
+            <ChildElements>
+                <Element name="Post">
+                    <Description>User's post.</Description>
+                    <Attributes>
+                        <Attribute name="id">
+                            <Type>ID</Type>
+                            <Required>true</Required>
+                            <Description>Unique identifier for the post.</Description>
+                        </Attribute>
+                    </Attributes>
+                    <ChildElements>
+                        <Element name="Text">
+                            <Description>Text of the post.</Description>
+                        </Element>
+                        <Element name="Date_Created">
+                            <Description>Post creation date.</Description>
+                        </Element>
+                        <Element name="Author">
+                            <Description>User's identifier who created the post.</Description>
+                        </Element>
+                    </ChildElements>
+                </Element>
+            </ChildElements>
+        </Element>
+
+        <Element name="Comments">
+            <Description>Contains user comments on posts.</Description>
+            <ChildElements>
+                <Element name="Comment">
+                    <Description>User's comment.</Description>
+                    <Attributes>
+                        <Attribute name="id">
+                            <Type>ID</Type>
+                            <Required>true</Required>
+                            <Description>Unique identifier for the comment.</Description>
+                        </Attribute>
+                    </Attributes>
+                    <ChildElements>
+                        <Element name="Text">
+                            <Description>Comment text.</Description>
+                        </Element>
+                        <Element name="Date_Created">
+                            <Description>Comment creation date.</Description>
+                        </Element>
+                        <Element name="Author">
+                            <Description>User identifier who created the comment.</Description>
+                        </Element>
+                        <Element name="Post_ID">
+                            <Description>Post identifier for the comment.</Description>
+                        </Element>
+                    </ChildElements>
+                </Element>
+            </ChildElements>
+        </Element>
+
+        <Element name="Likes">
+            <Description>Contains information about user likes on posts.</Description>
+            <ChildElements>
+                <Element name="Like">
+                    <Description>User's like.</Description>
+                    <Attributes>
+                        <Attribute name="id">
+                            <Type>ID</Type>
+                            <Required>true</Required>
+                            <Description>Unique identifier for the like.</Description>
+                        </Attribute>
+                    </Attributes>
+                    <ChildElements>
+                        <Element name="Date_Created">
+                            <Description>Like creation date.</Description>
+                        </Element>
+                        <Element name="Author">
+                            <Description>User identifier who liked the post.</Description>
+                        </Element>
+                        <Element name="Post_ID">
+                            <Description>Post identifier for the like.</Description>
+                        </Element>
+                    </ChildElements>
+                </Element>
+            </ChildElements>
+        </Element>
+
+        <Element name="Tags">
+            <Description>Contains information about tags related to posts.</Description>
+            <ChildElements>
+                <Element name="Tag">
+                    <Description>Tag of a post.</Description>
+                    <Attributes>
+                        <Attribute name="id">
+                            <Type>ID</Type>
+                            <Required>true</Required>
+                            <Description>Unique identifier for the tag.</Description>
+                        </Attribute>
+                    </Attributes>
+                    <ChildElements>
+                        <Element name="Name">
+                            <Description>Tag name.</Description>
+                        </Element>
+                        <Element name="Date_Created">
+                            <Description>Tag creation date.</Description>
+                        </Element>
+                        <Element name="Author">
+                            <Description>User identifier who created the tag.</Description>
+                        </Element>
+                        <Element name="Post_ID">
+                            <Description>Post identifier for the tag.</Description>
+                        </Element>
+                    </ChildElements>
+                </Element>
+            </ChildElements>
+        </Element>
+
+        <Element name="Movies">
+            <Description>Contains information about movies.</Description>
+            <ChildElements>
+                <Element name="Movie">
+                    <Description>Movie in the database.</Description>
+                    <Attributes>
+                        <Attribute name="id">
+                            <Type>ID</Type>
+                            <Required>true</Required>
+                            <Description>Unique identifier for the movie.</Description>
+                        </Attribute>
+                    </Attributes>
+                    <ChildElements>
+                        <Element name="Tool">
+                            <Description>Movie tool.</Description>
+                        </Element>
+                        <Element name="Info">
+                            <Description>Movie information.</Description>
+                        </Element>
+                        <Element name="Critics_Consensus">
+                            <Description>Movie's critics consensus.</Description>
+                        </Element>
+                        <Element name="Content_Rating">
+                            <Description>Movie's content rating.</Description>
+                        </Element>
+                        <Element name="Genres">
+                            <Description>Movie genres.</Description>
+                        </Element>
+                        <Element name="Authors">
+                            <Description>Movie authors.</Description>
+                        </Element>
+                        <Element name="Actors">
+                            <Description>Movie actors.</Description>
+                        </Element>
+                        <Element name="Original_Release_Date">
+                            <Description>Original movie release date.</Description>
+                        </Element>
+                        <Element name="Runtime">
+                            <Description>Movie runtime in minutes.</Description>
+                        </Element>
+                        <Element name="Production_Company">
+                            <Description>Movie's production company.</Description>
+                        </Element>
+                        <Element name="Rating">
+                            <Description>Movie rating.</Description>
+                        </Element>
+                    </ChildElements>
+                </Element>
+            </ChildElements>
+        </Element>
+    </Elements>
+    </Data>
+
+    <TechnicalSpecifications>
+        <Type>Database Management</Type>
+        <DevTools>
+            <Dev>Python 3.11.5</Dev>
+            <Dev>Flask</Dev>
+            <Dev>SQLAlchemy</Dev>
+            <Dev>Google Auth OAuthLib</Dev>
+            <Dev>Pandas</Dev>
+            <Dev>Scikit-Learn</Dev>
+            <Dev>pytest</Dev>
+            <Dev>Flask-Mail</Dev>
+            <Dev>Flask-Login</Dev>
+            <Dev>Werkzeug</Dev>
+            <Dev>Requests</Dev>
+        </DevTools>
+        <DBMS>
+            <Tool>SQLite</Tool>
+            <Reasoning>Lightweight and easy to integrate with Flask applications.</Reasoning>
+        </DBMS>
+        <Testing>
+            <Test>Unit testing with Pytest</Test>
+        </Testing>
+        <Deployment>
+            <Containerization>
+                <Tool>Docker</Tool>
+                <Description>
+                    The application is containerized using Docker for consistent deployment and environment management.
+                </Description>
+                <Dockerfile>
+                    <BaseImage>python:3.11.5</BaseImage>
+                    <WorkingDirectory>/app</WorkingDirectory>
+                    <KeySteps>
+                        <Step>Install dependencies from requirements.txt without caching.</Step>
+                        <Step>Set PYTHONPYCACHEPREFIX to disable .pyc files generation.</Step>
+                        <Step>Expose port 5000 for Flask application.</Step>
+                    </KeySteps>
+                </Dockerfile>
+            </Containerization>
+        </Deployment>
+
+
+    </TechnicalSpecifications>
+</TechnicalSpecification>
