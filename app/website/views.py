@@ -181,7 +181,7 @@ def like(post_id):
 
 def fetch_movie_poster(movie_title):
     movie_title = re.sub(r'^\d+\.\s*', '', movie_title)
-    movie_title = re.sub(r'\(\d{4}\)$', '', movie_title).strip()
+    movie_title = re.sub(r'\(.*?\)', '', movie_title).strip()
     api_key = current_app.config.get("API_KEY") #your_key
     url = f"http://www.omdbapi.com/?t={movie_title}&apikey={api_key}"
     try:
@@ -231,7 +231,7 @@ def recommendation_list():
                 if isinstance(movie, str):
                     movie = {'title': str(movie)}
 
-                mov = re.sub(r'^\d+\.\s*', '', movie['title'])
+                mov = re.sub(r'^\d+\.\s*', '', movie['title'])                                             
                 mov = re.sub(r'\(\d{4}\)$', '', mov).strip()
                 movie_data = Movie.query.filter_by(title=mov).first()
 

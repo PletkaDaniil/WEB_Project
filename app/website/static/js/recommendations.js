@@ -92,8 +92,18 @@ document.getElementById('rec-form').addEventListener('submit', function (e) {
                     movieDiv.className = 'movie-item';
 
                     const movieTitle = document.createElement('h3');
-                    movieTitle.textContent = rec.title;
+                    const titleWithoutBrackets = rec.title.replace(/\s?\(.*?\)/g, '');
+                    const yearPart = rec.title.match(/\(\d{4}\)$/);
+                    movieTitle.textContent = titleWithoutBrackets + (yearPart ? ` ${yearPart[0]}` : '');
                     movieDiv.appendChild(movieTitle);
+                    
+                    const separator = document.createElement('hr');
+                    separator.style.margin = '10px 0';
+                    movieDiv.appendChild(separator);
+
+                    const spacer = document.createElement('div');
+                    spacer.style.height = '15px';
+                    movieDiv.appendChild(spacer);
 
                     if (rec.poster_url) {
                         const moviePoster = document.createElement('img');
