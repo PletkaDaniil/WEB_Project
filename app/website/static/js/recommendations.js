@@ -100,7 +100,39 @@ document.getElementById('rec-form').addEventListener('submit', function (e) {
                         moviePoster.src = rec.poster_url;
                         moviePoster.alt = `Poster for ${rec.title}`;
                         moviePoster.className = 'movie-poster';
+                        moviePoster.dataset.id = rec.id;
                         movieDiv.appendChild(moviePoster);
+
+                        const movieDetails = document.createElement('div');
+                        movieDetails.className = 'movie-details';
+                        
+                        function formatNames(names) {
+                            if (!Array.isArray(names)) return null;
+                            const formattedNames = [];
+                            for (let i = 0; i < names.length; i += 2) {
+                                formattedNames.push(names.slice(i, i + 2).join(" "));
+                            }
+                            return formattedNames.join(", ");
+                        }
+                        
+                        const details = [
+                            { key: 'rating', label: 'Rating', value: rec.details.rating },
+                            { key: 'production_company', label: 'Production Company', value: rec.details.production_company },
+                            { key: 'runtime', label: 'Runtime', value: rec.details.runtime !== "0" ? `${rec.details.runtime} minutes` : null },
+                            { key: 'actors', label: 'Actors', value: rec.details.actors && !rec.details.actors.includes("none") ? formatNames(rec.details.actors) : null },
+                            { key: 'content_rating', label: 'Content Rating', value: rec.details.content_rating },
+                            { key: 'authors', label: 'Authors', value: rec.details.authors && !rec.details.authors.includes("none") ? formatNames(rec.details.authors) : null }
+                        ];
+                        
+                        const detailsHTML = details
+                            .filter(detail => detail.value && detail.value !== "none")
+                            .map(detail => `<p><strong>${detail.label}:</strong> ${detail.value}</p>`)
+                            .join("");
+                        
+                        if (detailsHTML) {
+                            movieDetails.innerHTML = detailsHTML;
+                            movieDiv.appendChild(movieDetails);
+                        }
                     } else {
                         const noPosterText = document.createElement('p');
                         noPosterText.textContent = 'Poster not available';

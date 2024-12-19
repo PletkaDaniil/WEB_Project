@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, flash, redirect, url_for, jsonify, current_app
 from flask_login import login_required, current_user
-from .models import Post, User, Comment, Like, Tag
+from .models import Post, User, Comment, Like, Tag, Movie
 from . import db
 from .recommendation_func import recommend_by_genre,recommend_by_content_rating, recommend_by_author, recommend_by_actor, recommend_by_original_release_year, recommend_by_production_company, recommend_by_plot
 import requests
@@ -226,17 +226,78 @@ def recommendation_list():
                 return jsonify({'error': result['error']}), 400
 
             recommendations = result.get("recommendations", [])
-            recommendations_with_posters = []
+            recommendations_with_details = []
             for movie in recommendations:
                 if isinstance(movie, str):
                     movie = {'title': str(movie)}
-                print(movie['title'])
-                poster_url = fetch_movie_poster(movie['title'])
-                movie['poster_url'] = poster_url if isinstance( poster_url, str) else None
-                recommendations_with_posters.append(movie)
-        else:
-            recommendations_with_posters = [{"title": f"No specific recommendations for '{user_input}'", "poster_url": None}]
 
-        return jsonify({"recommendations": recommendations_with_posters})
+                mov = re.sub(r'^\d+\.\s*', '', movie['title'])
+                mov = re.sub(r'\(\d{4}\)$', '', mov).strip()
+                movie_data = Movie.query.filter_by(title=mov).first()
+
+                if movie_data:
+                    movie['rating'] = movie_data.rating if movie_data.rating else "none"
+                    movie['production_company'] = movie_data.production_company if movie_data.production_company else "none"
+                    movie['runtime'] = movie_data.runtime if movie_data.runtime else "none"
+                    
+                    if movie_data.actors:
+                        actors = movie_data.actors.split()
+                        movie['actors'] = []
+                        temp_name = actors[0]
+                        for actor in actors[1:]:
+                            if actor[0].islower():
+                                temp_name += " " + actor
+                            else:
+                                movie['actors'].append(temp_name)
+                                temp_name = actor
+                        movie['actors'].append(temp_name)
+                        movie['actors'] = [actor.replace('"', '').replace("'", "") for actor in movie['actors'][:6] ] 
+                    else:
+                        movie['actors'] = ["none", "none", "none", "none", "none", "none"]
+                    
+                    movie['content_rating'] = movie_data.content_rating if movie_data.content_rating else "none"
+                    
+                    if movie_data.authors:
+                        authors = movie_data.authors.split()
+                        movie['authors'] = []
+                        temp_name = authors[0]
+                        for author in authors[1:]:
+                            if author[0].islower():
+                                temp_name += " " + author
+                            else:
+                                movie['authors'].append(temp_name)
+                                temp_name = author
+                        movie['authors'].append(temp_name)
+                        movie['authors'] = [actor.replace('"', '').replace("'", "") for actor in movie['authors'][:6] ] 
+                    else:
+                        movie['authors'] = ["none", "none", "none", "none"]
+                else:
+                    movie['rating'] = "none"
+                    movie['production_company'] = "none"
+                    movie['runtime'] = "none"
+                    movie['actors'] = ["none", "none", "none", "none", "none", "none"]
+                    movie['content_rating'] = "none"
+                    movie['authors'] = ["none", "none", "none", "none"]
+
+                poster_url = fetch_movie_poster(movie['title'])
+                movie['poster_url'] = poster_url if isinstance(poster_url, str) else None
+
+                recommendations_with_details.append({
+                    "title": movie['title'],
+                    "poster_url": movie['poster_url'],
+                    "details": {
+                        "rating": movie['rating'],
+                        "production_company": movie['production_company'],
+                        "runtime": movie['runtime'],
+                        "actors": movie['actors'],
+                        "content_rating": movie['content_rating'],
+                        "authors": movie['authors']
+                    }
+                })
+
+        else:
+            recommendations_with_details = [{"title": f"No specific recommendations for '{user_input}'", "poster_url": None}]
+
+        return jsonify({"recommendations": recommendations_with_details})
 
     return render_template('recommendations_system.html', user=current_user)
