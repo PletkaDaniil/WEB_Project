@@ -5,7 +5,7 @@
     <Overview>
         <Description>
             Technical specification for the database of a service that allows users to find movie recommendations based on their interests.
-            This is achieved through posts, comments, likes on posts, as well as tags and a large selection of movies.
+            This is achieved through posts, comments, likes on posts, as well as tags and a large selection of movies.There is also logging to record user actions on the website.
         </Description>
         <Version>1.0</Version>
         <CreatedBy>Pletka Daniil</CreatedBy>
@@ -13,11 +13,6 @@
     </Overview>
 
     <Roles>
-        <Role>
-            <Tool>Admin</Tool>
-            <Responsibility>Manage users</Responsibility>
-            <Responsibility>Moderate content</Responsibility>
-        </Role>
         <Role>
             <Tool>User</Tool>
 
@@ -171,6 +166,36 @@
             </ChildElements>
         </Element>
 
+        <Element name="Logs">
+            <Description>Contains logs of user actions in the system.</Description>
+            <ChildElements>
+                <Element name="Log">
+                    <Description>Record of a user action.</Description>
+                    <Attributes>
+                        <Attribute name="id">
+                            <Type>ID</Type>
+                            <Required>true</Required>
+                            <Description>Unique identifier for the log entry.</Description>
+                        </Attribute>
+                    </Attributes>
+                    <ChildElements>
+                        <Element name="Date_Created">
+                            <Description>Timestamp of when the action was logged.</Description>
+                        </Element>
+                        <Element name="Action">
+                            <Description>Description of the user action.</Description>
+                        </Element>
+                        <Element name="User_ID">
+                            <Description>Identifier of the user who performed the action.</Description>
+                        </Element>
+                        <Element name="Details">
+                            <Description>Additional details about the action.</Description>
+                        </Element>
+                    </ChildElements>
+                </Element>
+            </ChildElements>
+        </Element>
+
         <Element name="Movies">
             <Description>Contains information about movies.</Description>
             <ChildElements>
@@ -263,7 +288,5 @@
                 </Dockerfile>
             </Containerization>
         </Deployment>
-
-
     </TechnicalSpecifications>
 </TechnicalSpecification>
