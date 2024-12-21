@@ -155,6 +155,9 @@
                         <Element name="Date_Created">
                             <Description>Tag creation date.</Description>
                         </Element>
+                        <Element name="Is_Good">
+                            <Description>Tag validation for relevance to the movie theme.</Description>
+                        </Element>
                         <Element name="Author">
                             <Description>User identifier who created the tag.</Description>
                         </Element>
