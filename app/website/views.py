@@ -25,12 +25,13 @@ def create_post():
         raw_tags = request.form.get('tags')
         tag_names = []
         for tag in raw_tags.split():
-            tag = tag.strip().lower()
+            tag = tag.strip().lower().replace("_", " ")
             if not tag.startswith("#"):
                 tag = "#" + tag
             tag_names.append(tag)
 
         tag_names = set(tag_names)
+
         if not text:
             flash('Post cannot be empty', category='error')
         elif not raw_tags:
@@ -44,8 +45,45 @@ def create_post():
             db.session.add(post)
             db.session.commit()
 
+            good_tags, bad_tags = [], []
             for tag_name in tag_names:
-                tag = Tag(name=tag_name, author=current_user.id, post_id=post.id)
+                search_value = tag_name[1:]
+                if search_value.isdigit():
+                    bad_tags.append(tag_name)
+                    continue
+
+                query = Movie.query.filter(
+                    db.or_(
+                        db.func.lower(Movie.title) == search_value,
+                        db.func.lower(Movie.production_company) == search_value,
+                        db.func.lower(Movie.content_rating) == search_value
+                    )
+                ).first()
+                
+                found_in_actors = False
+                if not query:
+                    all_movies = Movie.query.all()
+
+                    escaped_tag = re.escape(search_value)
+                    pattern = fr'(^|\s){escaped_tag}(\s|$)'
+
+                    for movie in all_movies:
+                        if movie.actors:
+                            actor_string = movie.actors.replace('"', '').lower()
+
+                            if re.search(pattern, actor_string):
+                                found_in_actors = True
+                                break
+
+
+                if query or found_in_actors:
+                    good_tags.append(tag_name)
+                else:
+                    bad_tags.append(tag_name)
+
+            for tag_name in tag_names:
+                is_good = tag_name in good_tags
+                tag = Tag(name=tag_name, author=current_user.id, post_id=post.id, is_good=is_good)
                 db.session.add(tag)
 
             db.session.commit()

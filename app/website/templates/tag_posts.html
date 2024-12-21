@@ -56,11 +56,12 @@
             {% if post.tags|length > 0 %}
             <div class="tags mb-2">
                 {% for tag in post.tags %}
-                <a href="/tags/{{ tag.name|replace('#', '') }}" class="badge bg-info text-dark">
+                <a href="/tags/{{ tag.name|replace('#', '') }}" 
+                   class="badge {{ 'bg-success' if tag.is_good else 'bg-danger' }}">
                     {{ tag.name }}
                 </a>
                 {% endfor %}
-            </div>
+            </div>                        
             {% endif %}
             
             <div class="collapse" id="comments-{{ post.id }}">
