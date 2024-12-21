@@ -26,7 +26,9 @@ Users can share their thoughts and recommendations:
 - **Comment:** Users can leave comments on posts.
 
 ### 4. Tagging System
-Every post must include a tag. Tags help other users find recommendations for specific movies or actors, provided posts with such tags exist.
+Every post must include a tag. Tags help other users find recommendations for specific movies or actors, provided posts with such tags exist. There is also a tag sorting feature that allows users to distinguish whether tags are related to the movie theme or not.
+
+(**Green** indicates correct items, **red** indicates incorrect ones)
 
 ### 5. Platform Recommendation System
 The service provides a dedicated recommendation system:
@@ -36,6 +38,9 @@ The service provides a dedicated recommendation system:
 
 ### 6. Error Notifications
 If an error occurs while using the website, users will be notified via a pop-up window with details about the error type.
+
+### 7. Logging
+Logs are used to track all user actions on the website. They are stored in the database. In case of an error, it will be possible to trace user actions and address service issues.
 
 <br>
 
@@ -60,7 +65,7 @@ To run the service, you will need the following tools:
 
    Next, build and start the containers using:
    ```bash
-   docker-compose up --build
+   docker-compose up --build app
    ```
 3. **Shut Down Containers:**
 
@@ -81,12 +86,11 @@ To run the service, you will need the following tools:
    ```bash
    docker-compose down
    ```
-6. **Tests:**
+* **Tests:**
 
    After building the containers, to start tests, run:
    ```bash
-   docker-compose up tests
-   docker-compose down #after all
+      docker-compose run tests
    ```
 ---
 <br>
@@ -102,7 +106,7 @@ To view the technical specification formatted in XML, go to the `dtd` folder and
 
 ## **ER Diagram**
 
-The diagram is implemented in the [Diagram.drawio](dtd/technical_specification.xml).
+The diagram is implemented in the [Diagram.drawio](Diagram.drawio).
 
 To view it, open the [Draw.io](https://www.drawio.com/) website and insert the file.
 
@@ -113,20 +117,74 @@ To view it, open the [Draw.io](https://www.drawio.com/) website and insert the f
 
 <br>
 
-## Authorization Implementation
+## Project Explanation
 
-A dedicated email account was created for the implementation of the authorization system. Full access to this account is currently available to everyone.
+1.  **How to set up the poster functionality?**
 
-Gmail: movie.recommendation.site@gmail.com
+You need to visit [the website](https://www.omdbapi.com). Select "API Key" from the top menu and complete the registration process.
 
-...
+![OMDB](images/OMDB.png)
 
+After registration, you will receive an email containing the API key. Insert this key into the [user_server.json](app/website/user_server.json) file.
+
+```bash
+   {
+    "user":{
+            ...
+            "api_key": "your_key"
+        }
+   }
+```
+
+---
+
+2.  **How to log in using Google Mail?**
+
+Here’s [an example guide](https://www.youtube.com/watch?v=FKgJEfrhU1E&t=392s) on how to complete all the steps in Google Cloud and obtain a [client_secret.json](app/website/client_secret.json)  file as a result:
+
+```bash
+   {
+    "web":{
+        "client_id":"",
+        "project_id":"",
+        "auth_uri":"",
+        "token_uri":"",
+        "auth_provider_x509_cert_url":"",
+        "client_secret":"",
+        "redirect_uris":[""]
+      }
+   }
+```
+---
+
+3.  **How to send a confirmation code to any email in the sign_up section?**
+
+First, choose the Google account to which you will link this functionality.
+Enable two-factor authentication on your account.
+Then, go to the App Passwords section and generate your app password.
+
+![OMDB](images/App_passwords.png)
+
+
+Update the [user_server.json](app/website/user_server.json) file with your information.
+
+```bash
+   {
+    "user":
+        {
+            "MAIL_USERNAME": "your_email@gmail.com",
+            "MAIL_PASSWORD": "your_password",
+            "MAIL_DEFAULT_SENDER": "your_email@gmail.com",
+            ...
+        }
+   }
+```
 
 ---
 
 <br>
 
-## **API**
+## **API/UI**
 
 
 ### _GET Routes_ :
