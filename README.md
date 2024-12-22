@@ -67,6 +67,9 @@ To run the service, you will need the following tools:
    ```bash
    docker-compose up --build app
    ```
+
+### Other Steps
+
 3. **Shut Down Containers:**
 
    To stop the containers, use:
@@ -74,17 +77,11 @@ To run the service, you will need the following tools:
    docker-compose down
    ```
 
-4. **Start the Application:**
+4. **Start the Application again:**
 
    After building the containers, to start the application, run:
    ```bash
    docker-compose up app
-   ```
-5. **Stop the Application:**
-
-   To stop the application, use:
-   ```bash
-   docker-compose down
    ```
 * **Tests:**
 
