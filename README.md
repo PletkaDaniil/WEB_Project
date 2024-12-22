@@ -184,70 +184,110 @@ Update the [user_server.json](app/website/user_server.json) file with your infor
 
 <br>
 
-## **API/UI**
+## **API**
+
+1. `/home  (GET)`
+
+**Purpose**: Displays the home page with posts sorted by the number of likes. **Available only to logged-in users**.
+
+2. `/login (GET, POST)`
+
+**Purpose**: Handles user login.
+
+**POST**: Takes user email and password, authenticates the user, and logs them in.
+
+**GET**: Renders the login page.
+
+3. `/login/google (GET)`
+
+**Purpose**: Redirects the user to Google’s OAuth login page.
+
+**Flow**: Initiates the Google OAuth flow and stores the session state.
+
+4. `/callback (GET)`
+
+**Purpose**: Handles the Google OAuth callback.
+
+**Flow**: Verifies the user's ID token, checks if the user exists in the database, and logs them in (or creates a new user).
+
+5. `/logout (GET)`
+
+**Purpose**: Logs the current user out.
+
+**Flow**: Ends the user session and redirects to the home page.
+
+6. `/sign-up (GET, POST)`
+
+**Purpose**: Handles user registration.
+
+**POST**: Takes user email, username, and password. Validates input, checks if the email or username already exists, and sends a confirmation email with a code.
+
+**GET**: Renders the signup page.
+
+7. `/confirm-email (GET, POST)`
+
+**Purpose**: Verifies the confirmation code sent to the user’s email during registration.
+
+**POST**: Takes the confirmation code entered by the user, verifies it, and completes the user registration if correct.
+
+**GET**: Renders the confirmation page.
+
+8. `/create-post (GET, POST)`
+
+**Purpose**: Allows users to create a new post.
+
+**POST**: Accepts the text and tags for the post, validates the input, and classifies the tags as "good" or "bad". Creates the post in the database with the associated tags and displays a success message. Available only to logged-in users.
+
+**GET**: Renders the page to create a new post. Available only to logged-in users.
+
+9. `/delete-post/<id>  (GET)`
+
+**Purpose**: Allows users to delete their post.
+
+**Flow**: Deletes the specified post along with its associated tags, comments, and likes if the user is the author of the post. Displays an error message if the user does not have permission to delete the post. Available only to the post author.
+
+10. `/posts/<username> (GET)`
+
+**Purpose**: Displays posts of a specific user.
+
+**Flow**: Fetches posts of the given user, sorts them by the number of likes, and displays them. Displays an error message if the user does not exist. Available only to logged-in users.
+
+11. `/tags/<tag_name> (GET)`
+
+**Purpose**: Displays posts associated with a specific tag.
+
+**Flow**: Fetches posts related to the given tag and sorts them by the number of likes. If no posts are found for the tag, it shows a message indicating there are no posts. Available only to logged-in users.
+
+12. `/create-comment/<post_id> (POST)`
+
+**Purpose**: Allows users to create a comment on a post.
+
+**Flow**: Accepts text for the comment, validates it, and associates it with the post. Displays an error message if the comment is empty. Available only to logged-in users.
 
 
-### _GET Routes_ :
+12. `/delete-comment/<comment_id>  (GET)`
 
-#### **GET** `/login`
-- **Description**: Displays the login page for users.
-- **Process**: The user is presented with a form to enter their email and password. This is the initial page for logging into the system.
-- **Response**: Renders an HTML login form.
+**Purpose**: Allows users to delete their comment or a comment on their own post.
 
-#### **GET** `/login/google`
-- **Description**: Initiates the Google OAuth authentication process.
-- **Process**: The user is redirected to the Google login page. After successful login, OAuth will redirect the user back to the `/callback` route.
-- **Response**: Redirects the user to Google for authentication.
+**Flow**: Deletes the comment if the user is the author of the comment or the post. Displays an error message if the user does not have permission to delete the comment. Available only to logged-in users.
 
-#### **GET** `/callback`
-- **Description**: Handles the callback from Google OAuth and finalizes the authentication process.
-- **Process**: After the user logs in through Google, the system extracts the user’s information and stores it. If the user is new, they will be added to the database.
-- **Response**: Redirects the user to the homepage or profile page.
+13. `/like-post/<post_id> (POST)`
 
-#### **GET** `/logout`
-- **Description**: Ends the current user session.
-- **Process**: Removes session data and redirects the user to the homepage.
-- **Response**: Redirects to the homepage.
+**Purpose**: Allows users to like or unlike a post.
 
-#### **GET** `/home`
-- **Description**: Displays the main feed of posts.
-- **Process**: The user can view all available posts sorted by the number of likes or other criteria.
-- **Response**: Renders an HTML page with the list of posts.
+**Flow**: Toggles the like status of the post. Updates the number of likes and the like status dynamically. Available only to logged-in users.
 
-#### **GET** `/create-post`
-- **Description**: Displays a form for creating a new post.
-- **Process**: The user is shown a form to input the title, description, and other details for the new post.
-- **Response**: Renders an HTML form for entering post details.
+14. `/recommendations-system (GET, POST)`
 
-#### **GET** `/delete-post/<id>`
-- **Description**: Deletes a post with the given ID.
-- **Process**: The user is prompted to confirm the deletion of the post.
-- **Response**: Redirects to the main feed with the updated list of posts.
+**Purpose**: Allows users to get movie recommendations based on selected criteria.
 
-#### **GET** `/posts/<username>`
-- **Description**: Displays all posts from a specific user.
-- **Process**: Only posts from the user with the given username are shown.
-- **Response**: Renders an HTML page displaying the user’s posts.
+**POST**: Accepts the selected criterion (e.g., genre, rating, actor) and user input. Calls the corresponding recommendation function to fetch movie recommendations, and returns the results with detailed movie information. Available only to logged-in users.
+
+**GET**: Renders the page where users can select a criterion for movie recommendations. Available only to logged-in users.
+
 
 ---
 
-###  _POST Routes_ :
+<br>
 
-#### **POST** `/login`
-- **Description**: Handles user login.
-- **Process**: When the user submits their login form with email and password, the system checks the credentials and logs the user in if they are correct.
-- **Response**: Redirects the user to the homepage or the dashboard if login is successful.
-
-#### **POST** `/create-post`
-- **Description**: Creates a new post.
-- **Process**: The user submits a form with the post details, such as title, description, and associated movie information.
-- **Response**: Redirects the user back to the homepage with the new post displayed in the feed.
-
-#### **POST** `/delete-post/<id>`
-- **Description**: Deletes a post.
-- **Process**: The system removes the post with the given ID from the database.
-- **Response**: Redirects to the homepage with the updated list of posts.
-
-
----
 This project is designed to provide a seamless and interactive movie recommendation experience for all users. Enjoy exploring and discovering great films!
